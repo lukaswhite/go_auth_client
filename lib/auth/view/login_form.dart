@@ -5,8 +5,9 @@ import 'package:go_auth_client/auth/http/requests/login_request.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/responses/responses.dart';
-import 'package:go_auth_client/forms/view/form_validation_error.dart';
+import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
+import 'package:go_auth_client/forms/view/form_validation_error.dart';
 import 'package:get_it/get_it.dart';
 
 class LoginForm extends StatelessWidget {
@@ -35,41 +36,47 @@ class LoginForm extends StatelessWidget {
                 children: [
                   if (state is LoginError && state.response is UnauthorizedResponse) 
                     Text('Username or password is incorrect'),
-                  ReactiveTextField<String>(
-                    formControlName: 'username',
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
+                  FormElementWrapper(
+                    child: ReactiveTextField<String>(
+                      formControlName: 'username',
+                      decoration: const InputDecoration(
+                        labelText: 'Username',
+                      ),
+                      validationMessages: {
+                        ValidationMessage.required: (_) => 'Username must not be empty',
+                        ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
+                      },
+                      readOnly: (state is LoginSubmitting),
                     ),
-                    validationMessages: {
-                      ValidationMessage.required: (_) => 'Username must not be empty',
-                      ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
-                    },
-                    readOnly: (state is LoginSubmitting),
                   ),
-                  ReactiveTextField<String>(
-                    formControlName: 'password',
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
+                  FormElementWrapper(
+                    child: ReactiveTextField<String>(
+                      formControlName: 'password',
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                      ),
+                      validationMessages: {
+                        ValidationMessage.required: (_) => 'Password must not be empty',
+                      },
+                      readOnly: (state is LoginSubmitting),
                     ),
-                    validationMessages: {
-                      ValidationMessage.required: (_) => 'Password must not be empty',
-                    },
-                    readOnly: (state is LoginSubmitting),
                   ),
                   ReactiveFormConsumer(
                     builder: (context, form, child) {
-                      return ElevatedButton(
+                      return FormElementWrapper(
+                        child: ElevatedButton(
                         //onPressed: form.valid ? () => print(form.value) : null,
-                        onPressed: (state is! LoginSubmitting) ? () {
-                          form.markAllAsTouched();
-                          if(!form.valid) {
-                            return;
-                          }
-                          LoginRequest request = LoginRequest.fromMap(form.value);
-                          context.read<LoginBloc>().add(LoginSubmit(request: request));
-                        } : null,
-                        child: const Text('CONTINUE'),
+                          onPressed: (state is! LoginSubmitting) ? () {
+                            form.markAllAsTouched();
+                            if(!form.valid) {
+                              return;
+                            }
+                            LoginRequest request = LoginRequest.fromMap(form.value);
+                            context.read<LoginBloc>().add(LoginSubmit(request: request));
+                          } : null,
+                          child: const Text('Log in'),
+                        ),
                       );
                     },
                   ),

@@ -5,6 +5,7 @@ import 'package:go_auth_client/auth/http/requests/signup_request.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/responses/responses.dart';
+import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
 import 'package:go_auth_client/forms/view/form_validation_error.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
 import 'package:get_it/get_it.dart';
@@ -35,59 +36,67 @@ class SignupForm extends StatelessWidget {
               return Column(
                 children: [
                   Text(state.toString()),
-                  ReactiveTextField<String>(
-                    formControlName: 'username',
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
+                  FormElementWrapper(
+                    child: ReactiveTextField<String>(
+                      formControlName: 'username',
+                      decoration: const InputDecoration(
+                        labelText: 'Username',
+                      ),
+                      validationMessages: {
+                        ValidationMessage.required: (_) => 'Username must not be empty',
+                        ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
+                      },
+                      readOnly: (state is SignupSubmitting),
                     ),
-                    validationMessages: {
-                      ValidationMessage.required: (_) => 'Username must not be empty',
-                      ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
-                    },
-                    readOnly: (state is SignupSubmitting),
                   ),
                   if (state is SignupError && state.response is ValidationFailedResponse) 
                     FormValidationErrors(errors: (state.response as ValidationFailedResponse).getErrors('username')), 
                   if (state is SignupError && state.response is DuplicateEntityResponse && (state.response as DuplicateEntityResponse).field == 'username')
                     Text('That username is taken'),
-                  ReactiveTextField<String>(
-                    formControlName: 'name',
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
+                  FormElementWrapper(
+                    child: ReactiveTextField<String>(
+                      formControlName: 'name',
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                      ),
+                      validationMessages: {
+                        ValidationMessage.required: (_) => 'Name must not be empty',
+                      },
+                      readOnly: (state is SignupSubmitting),
                     ),
-                    validationMessages: {
-                      ValidationMessage.required: (_) => 'Name must not be empty',
-                    },
-                    readOnly: (state is SignupSubmitting),
                   ),
                   if (state is SignupError && state.response is ValidationFailedResponse) 
                     FormValidationErrors(errors: (state.response as ValidationFailedResponse).getErrors('name')), 
-                  ReactiveTextField<String>(
-                    formControlName: 'password',
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
+                  FormElementWrapper(
+                    child: ReactiveTextField<String>(
+                      formControlName: 'password',
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                      ),
+                      validationMessages: {
+                        ValidationMessage.required: (_) => 'Password must not be empty',
+                      },
+                      readOnly: (state is SignupSubmitting),
                     ),
-                    validationMessages: {
-                      ValidationMessage.required: (_) => 'Password must not be empty',
-                    },
-                    readOnly: (state is SignupSubmitting),
                   ),
                   if (state is SignupError && state.response is ValidationFailedResponse) 
                     FormValidationErrors(errors: (state.response as ValidationFailedResponse).getErrors('password')), 
                   ReactiveFormConsumer(
                     builder: (context, form, child) {
-                      return ElevatedButton(
-                        //onPressed: form.valid ? () => print(form.value) : null,
-                        onPressed: (state is! SignupSubmitting) ? () {
-                          form.markAllAsTouched();
-                          if(!form.valid) {
-                            return;
-                          }
-                          SignupRequest request = SignupRequest.fromMap(form.value);
-                          context.read<SignupBloc>().add(SignupSubmit(request: request));
-                        } : null,
-                        child: const Text('CONTINUE'),
+                      return FormElementWrapper(
+                        child: ElevatedButton(
+                          //onPressed: form.valid ? () => print(form.value) : null,
+                          onPressed: (state is! SignupSubmitting) ? () {
+                            form.markAllAsTouched();
+                            if(!form.valid) {
+                              return;
+                            }
+                            SignupRequest request = SignupRequest.fromMap(form.value);
+                            context.read<SignupBloc>().add(SignupSubmit(request: request));
+                          } : null,
+                          child: const Text('Sign Up'),
+                        ),
                       );
                     },
                   ),

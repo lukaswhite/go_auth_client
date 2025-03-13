@@ -13,6 +13,9 @@ class ClientConfig {
     this.port = 443,
     this.isHttps = true,
   });
+
+  ClientConfig.http(this.hostname): port = 80, isHttps = false;
+  ClientConfig.https(this.hostname): port = 443, isHttps = true;
 }
 
 class Client {
@@ -31,9 +34,13 @@ class Client {
   Future<Response> post(String path, Map<String, String> payload) async {
     var response = await http.post(
       url(path), 
-      headers: headers(),
+      headers: _headers(),
       body: jsonEncode(payload),
     );
+    return _convertResponse(response);
+  }
+
+  Response _convertResponse(http.Response response) {
     if(response.statusCode == 401) {
       return UnauthorizedResponse();
     }
@@ -49,7 +56,7 @@ class Client {
     if(response.statusCode == 500) {
       return ServerErrorResponse();
     }
-    return Response(statusCode: response.statusCode, body: jsonDecode(response.body)['body']);
+    return Response.fromResponse(response);
   }
 
   Uri url(String path) {
@@ -62,7 +69,7 @@ class Client {
     return config.isHttps ? Uri.https(authority, path) : Uri.http(authority, path);
   }
 
-  Map<String, String> headers() {
+  Map<String, String> _headers() {
     Map<String, String> headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',

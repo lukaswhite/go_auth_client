@@ -6,6 +6,8 @@ import 'package:go_auth_client/http/client.dart';
 
 void main() async {
 
+  WidgetsFlutterBinding.ensureInitialized();
+
   final ClientConfig clientConfig = ClientConfig(
     hostname: 'localhost',
     port: 3001,

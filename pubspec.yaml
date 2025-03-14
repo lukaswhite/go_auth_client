@@ -23,6 +23,8 @@ dependencies:
   http_status_code: ^0.0.2
   custom_sliding_segmented_control: ^1.8.5
   pretty_animated_buttons: ^0.0.2
+  quickalert: ^1.1.0
+  animated_visibility: ^0.0.4
 
 dev_dependencies:
   flutter_test:

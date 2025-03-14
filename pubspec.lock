@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  custom_sliding_segmented_control:
+    dependency: "direct main"
+    description:
+      name: custom_sliding_segmented_control
+      sha256: bc747b1500284bff36fc8c61774c9a3ca35c1dca4d570141c8a2569b4f984bf3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.5"
   dartz:
     dependency: "direct main"
     description:
@@ -102,6 +110,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.1.6"
+  flutter_inset_shadow:
+    dependency: transitive
+    description:
+      name: flutter_inset_shadow
+      sha256: "5978b67f028c7ca3566516eda14f0a25a5ce13c0fa21a86a48a0b00faa7db9d7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -192,6 +208,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  http_status_code:
+    dependency: "direct main"
+    description:
+      name: http_status_code
+      sha256: "052b42add019380f060cbf9cc9669b6831ca7e0244c925c520de8c1867dd139d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   intl:
     dependency: transitive
     description:
@@ -344,6 +368,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  pretty_animated_buttons:
+    dependency: "direct main"
+    description:
+      name: pretty_animated_buttons
+      sha256: "6dfa26d1d625f71c63dace9c1f88a6d4c13d8e761be973187ecc2e5fa2af0a85"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   provider:
     dependency: transitive
     description:

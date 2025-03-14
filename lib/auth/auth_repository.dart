@@ -45,10 +45,24 @@ class AuthRepository {
     if(response.isError) {
       return Right(response);
     }
+    //(Token token, User user) = 
     final Token token = Token.fromJson(response.body['token']);
     final User user = User.fromJson(response.body['user']);
+    //var record = parseResponse(response);
     await _authenticate(token: token, user: user,);
     return Left(user);
+    /**
+    var record = parseResponse(response);
+    await _authenticate(token: record.$1, user: record.$2,);
+    return Left(record.$2);
+     */
+  }
+
+  (Token, User) parseResponse(Response response) {
+    return (
+      Token.fromJson(response.body['token']),
+      User.fromJson(response.body['user'])
+    );
   }
 
   Future<Either<User, Response>> login(LoginRequest request) async {

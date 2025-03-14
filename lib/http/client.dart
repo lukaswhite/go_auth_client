@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../auth/models/models.dart';
 import 'responses/responses.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_status_code/http_status_code.dart';
 
 class ClientConfig {
   final String hostname;
@@ -13,6 +14,12 @@ class ClientConfig {
     this.port = 443,
     this.isHttps = true,
   });
+
+  factory ClientConfig.fromJson(Map<String, dynamic> json) => ClientConfig(
+    hostname: json['hostname'],
+    port: json['port'] ?? 443,
+    isHttps: json['is_https'] ?? true,
+  );
 
   ClientConfig.http(this.hostname): port = 80, isHttps = false;
   ClientConfig.https(this.hostname): port = 443, isHttps = true;
@@ -41,19 +48,19 @@ class Client {
   }
 
   Response _convertResponse(http.Response response) {
-    if(response.statusCode == 401) {
+    if(response.statusCode == StatusCode.UNAUTHORIZED) {
       return UnauthorizedResponse();
     }
-    if(response.statusCode == 404) {
+    if(response.statusCode == StatusCode.NOT_FOUND) {
       return NotFoundResponse();
     }
-    if(response.statusCode == 422) {
+    if(response.statusCode == StatusCode.UNPROCESSABLE_ENTITY) {
       return ValidationFailedResponse.fromResponse(response);
     }
-    if(response.statusCode == 409) {
+    if(response.statusCode == StatusCode.CONFLICT) {
       return DuplicateEntityResponse(statusCode: response.statusCode, field: jsonDecode(response.body)['body']['field']);
     }
-    if(response.statusCode == 500) {
+    if(response.statusCode == StatusCode.INTERNAL_SERVER_ERROR) {
       return ServerErrorResponse();
     }
     return Response.fromResponse(response);

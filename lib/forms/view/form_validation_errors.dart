@@ -13,6 +13,12 @@ class FormValidationErrors extends StatelessWidget {
     if(errors.isEmpty) {
       return const SizedBox();
     }
-    return Column(children: errors.map((error) => FormValidationError(error: error)).toList());
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0,),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: errors.map((error) => FormValidationError(error: error)).toList(),
+      ),
+    );
   }
 }

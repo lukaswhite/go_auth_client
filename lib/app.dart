@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_auth_client/auth/view/signup_form.dart';
 import 'package:go_auth_client/auth/view/login_form.dart';
+import 'package:go_auth_client/auth/view/auth_widget.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -34,9 +35,10 @@ class HomePage extends StatelessWidget {
       ),
       body: const Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            LoginForm(),
+            AuthWidget(),
+            //LoginForm(),
             //SignupForm(),            
           ],
         ),

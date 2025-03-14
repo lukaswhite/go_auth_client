@@ -8,6 +8,7 @@ import 'package:go_auth_client/http/responses/responses.dart';
 import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
 import 'package:go_auth_client/forms/view/form_validation_error.dart';
+import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
 
 class LoginForm extends StatelessWidget {
@@ -65,17 +66,17 @@ class LoginForm extends StatelessWidget {
                   ReactiveFormConsumer(
                     builder: (context, form, child) {
                       return FormElementWrapper(
-                        child: ElevatedButton(
+                        child: PrettyWaveButton(
                         //onPressed: form.valid ? () => print(form.value) : null,
-                          onPressed: (state is! LoginSubmitting) ? () {
+                          onPressed: () {
                             form.markAllAsTouched();
                             if(!form.valid) {
                               return;
                             }
                             LoginRequest request = LoginRequest.fromMap(form.value);
                             context.read<LoginBloc>().add(LoginSubmit(request: request));
-                          } : null,
-                          child: const Text('Log in'),
+                          },
+                          child: const Text('Log in', style: TextStyle(color: Colors.white),),
                         ),
                       );
                     },

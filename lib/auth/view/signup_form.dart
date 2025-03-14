@@ -8,6 +8,7 @@ import 'package:go_auth_client/http/responses/responses.dart';
 import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
 import 'package:go_auth_client/forms/view/form_validation_error.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
+import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
 
 class SignupForm extends StatelessWidget {
@@ -34,8 +35,8 @@ class SignupForm extends StatelessWidget {
             form: () => form,
             builder: (context, form, child) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(state.toString()),
                   FormElementWrapper(
                     child: ReactiveTextField<String>(
                       formControlName: 'username',
@@ -85,17 +86,17 @@ class SignupForm extends StatelessWidget {
                   ReactiveFormConsumer(
                     builder: (context, form, child) {
                       return FormElementWrapper(
-                        child: ElevatedButton(
+                        child: PrettyWaveButton(
                           //onPressed: form.valid ? () => print(form.value) : null,
-                          onPressed: (state is! SignupSubmitting) ? () {
+                          onPressed: () {
                             form.markAllAsTouched();
                             if(!form.valid) {
                               return;
                             }
                             SignupRequest request = SignupRequest.fromMap(form.value);
                             context.read<SignupBloc>().add(SignupSubmit(request: request));
-                          } : null,
-                          child: const Text('Sign Up'),
+                          },
+                          child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
                         ),
                       );
                     },

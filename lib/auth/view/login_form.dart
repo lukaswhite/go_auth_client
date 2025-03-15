@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_auth_client/auth/bloc/login_bloc.dart';
-import 'package:quickalert/models/quickalert_options.dart';
-import 'package:quickalert/widgets/quickalert_container.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:go_auth_client/auth/http/requests/login_request.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,13 +7,12 @@ import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/responses/responses.dart';
 import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
 import 'package:go_auth_client/forms/view/form_error.dart';
-import 'package:go_auth_client/forms/view/form_validation_errors.dart';
-import 'package:go_auth_client/forms/view/form_validation_error.dart';
 import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:animated_visibility/animated_visibility.dart';
 import 'package:go_router/go_router.dart';
+import 'package:go_auth_client/ui/view/loading_overlay.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -44,9 +41,9 @@ class LoginForm extends StatelessWidget {
           }
         },
         child: BlocBuilder<LoginBloc, LoginState>(
-          builder: (context, state) => Stack(
-            children: [
-              ReactiveFormBuilder(
+          builder: (context, state) => LoadingOverlay(
+            visible: (state is LoginSubmitting),
+            child: ReactiveFormBuilder(
               form: () => form,
               builder: (context, form, child) {
                 return Column(
@@ -101,34 +98,8 @@ class LoginForm extends StatelessWidget {
                     ),
                   ]
                 );
-              }
+              },
             ),
-            Positioned.fill(
-              child: AnimatedVisibility(
-                visible: (state is LoginSubmitting),
-                child: Container(
-                  color: const Color.fromARGB(180, 0, 0, 0),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-      )
-            /** 
-            if(state is LoginSubmitting) Positioned.fill(
-                child: Container(
-                  color: const Color.fromARGB(200, 0, 0, 0),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              **/
-            ],
           ),
         ),
       ),

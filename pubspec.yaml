@@ -26,6 +26,7 @@ dependencies:
   quickalert: ^1.1.0
   animated_visibility: ^0.0.4
   go_router: ^14.8.1
+  password_strength_checker: ^1.2.4
 
 dev_dependencies:
   flutter_test:

@@ -4,7 +4,7 @@ import 'package:go_auth_client/auth/view/logout_button.dart';
 import 'package:go_auth_client/auth/cubit/auth_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/view/auth_builder.dart';
-import 'auth_screen.dart';
+import 'screens.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,9 +24,12 @@ class HomeScreen extends StatelessWidget {
               builder: (context, user) => Text('Hello ${user.name}'),
               child: const Text('You are not logged in'),
             ),
+            AuthBuilder(
+              builder: (context, user) => TextButton(onPressed: () => context.push(AccountScreen.route), child: const Text('Your account')),
+            ),
             BlocBuilder<AuthCubit, AuthState>(
               builder: (context, state) => (state is AuthAnonymous) ? 
-                TextButton(onPressed: () => GoRouter.of(context).go(AuthScreen.route), child: const Text('Login')) :
+                TextButton(onPressed: () => context.go(AuthScreen.route), child: const Text('Login')) :
                   const SizedBox(),
             ),
             const LogoutButton(),

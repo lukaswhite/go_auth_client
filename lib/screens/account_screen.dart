@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_auth_client/auth/view/auth_builder.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -7,8 +8,13 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text('todo'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Your Account'),
+      ),
+      body: AuthBuilder(
+        builder: (context, user) => Text(user.name),
+      ),
     );
   }
 }

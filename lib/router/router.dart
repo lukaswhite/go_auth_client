@@ -6,6 +6,14 @@ import 'package:go_auth_client/screens/screens.dart';
 
 final _authRepository = GetIt.I.get<AuthRepository>();
 
+String? _guard(BuildContext context, GoRouterState state) {
+  return !_authRepository.isAuthenticated ? '/' : null;
+}
+
+String? _anonymous(BuildContext context, GoRouterState state) {
+  return _authRepository.isAuthenticated ? '/' : null;
+}
+
 final router = GoRouter(
   routes: [
     GoRoute(
@@ -15,35 +23,17 @@ final router = GoRouter(
     GoRoute(
       path: AuthScreen.route,
       builder: (context, state) => const AuthScreen(),
-      redirect: (BuildContext context, GoRouterState state) {
-        if (_authRepository.isAuthenticated) {
-          return '/';
-        } else {
-          return null;
-        }   
-      },
+      redirect: (BuildContext context, GoRouterState state) => _anonymous(context, state),
     ),
     GoRoute(
       path: AccountScreen.route,
       builder: (context, state) => const AccountScreen(),
-      redirect: (BuildContext context, GoRouterState state) {
-        if (!_authRepository.isAuthenticated) {
-          return '/';
-        } else {
-          return null;
-        }   
-      },
+      redirect: (BuildContext context, GoRouterState state) => _guard(context, state),
     ),
     GoRoute(
       path: WelcomeScreen.route,
       builder: (context, state) => const WelcomeScreen(),
-      redirect: (BuildContext context, GoRouterState state) {
-        if (!_authRepository.isAuthenticated) {
-          return '/';
-        } else {
-          return null;
-        }   
-      },
+      redirect: (BuildContext context, GoRouterState state) => _guard(context, state),
     ),
   ],
   redirect: (BuildContext context, GoRouterState state) {

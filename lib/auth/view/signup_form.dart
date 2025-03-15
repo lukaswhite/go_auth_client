@@ -6,21 +6,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/responses/responses.dart';
 import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
+import 'package:go_auth_client/forms/view/form_error.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
 import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:go_router/go_router.dart';
+import 'package:animated_visibility/animated_visibility.dart';
 import 'package:go_auth_client/screens/welcome_screen.dart';
+import 'package:password_strength_checker/password_strength_checker.dart';
+import 'package:go_auth_client/ui/view/loading_overlay.dart';
 
 class SignupForm extends StatelessWidget {
-  const SignupForm({super.key});
+  SignupForm({super.key});
 
   FormGroup get form => fb.group(<String, Object>{
     'username': ['', Validators.required, Validators.minLength(6)],
     'name': ['', Validators.required],
     'password': ['', Validators.required],
   });
+
+  final passNotifier = ValueNotifier<PasswordStrength?>(null);
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +47,18 @@ class SignupForm extends StatelessWidget {
           }
         },
         child: BlocBuilder<SignupBloc, SignupState>(
-          builder: (context, state) => ReactiveFormBuilder(
+          builder: (context, state) => LoadingOverlay(
+            visible: (state is SignupSubmitting),
+            child: ReactiveFormBuilder(
             form: () => form,
             builder: (context, form, child) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  AnimatedVisibility(
+                    visible: (state is SignupError && state.response is DuplicateEntityResponse && (state.response as DuplicateEntityResponse).field == 'username'),
+                    child: const FormError(message: 'That username is taken'),           
+                  ),
                   FormElementWrapper(
                     child: ReactiveTextField<String>(
                       formControlName: 'username',
@@ -62,8 +74,6 @@ class SignupForm extends StatelessWidget {
                   ),
                   if (state is SignupError && state.response is ValidationFailedResponse) 
                     FormValidationErrors(errors: (state.response as ValidationFailedResponse).getErrors('username')), 
-                  if (state is SignupError && state.response is DuplicateEntityResponse && (state.response as DuplicateEntityResponse).field == 'username')
-                    Text('That username is taken'),
                   FormElementWrapper(
                     child: ReactiveTextField<String>(
                       formControlName: 'name',
@@ -89,8 +99,14 @@ class SignupForm extends StatelessWidget {
                         ValidationMessage.required: (_) => 'Password must not be empty',
                       },
                       readOnly: (state is SignupSubmitting),
+                      onChanged: (control) => passNotifier.value = PasswordStrength.calculate(text: control.value!),
                     ),
                   ),
+                  /** 
+                  PasswordStrengthChecker(
+                    strength: passNotifier,
+                  ),
+                  **/
                   if (state is SignupError && state.response is ValidationFailedResponse) 
                     FormValidationErrors(errors: (state.response as ValidationFailedResponse).getErrors('password')), 
                   ReactiveFormConsumer(
@@ -112,8 +128,9 @@ class SignupForm extends StatelessWidget {
                     },
                   ),
                 ]
-              );
+            );
             }
+            ),
           ),
         ),
       ),

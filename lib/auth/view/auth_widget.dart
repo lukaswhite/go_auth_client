@@ -49,7 +49,7 @@ class AuthWidget extends StatelessWidget {
                 child: child,
               ), 
               child: (state as AuthWidgeDisplay).view == AuthWidgetView.login ? 
-                const LoginForm() : const SignupForm(),
+                const LoginForm() : SignupForm(),
             ),
           ],
         ),

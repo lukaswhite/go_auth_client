@@ -6,10 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/responses/responses.dart';
 import 'package:go_auth_client/forms/view/form_element_wrapper.dart';
-import 'package:go_auth_client/forms/view/form_validation_error.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
 import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
+import 'package:quickalert/quickalert.dart';
+import 'package:go_router/go_router.dart';
+import 'package:go_auth_client/screens/welcome_screen.dart';
 
 class SignupForm extends StatelessWidget {
   const SignupForm({super.key});
@@ -27,7 +29,15 @@ class SignupForm extends StatelessWidget {
       child: BlocListener<SignupBloc, SignupState>(
         listener: (context, state) {
           if(state is SignupComplete) {
-            print('COMPLETE');
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.success,
+              text: 'You have signed up successfully',
+              onConfirmBtnTap: () {
+                Navigator.of(context).pop();
+                GoRouter.of(context).replace(WelcomeScreen.route);
+              }
+            );
           }
         },
         child: BlocBuilder<SignupBloc, SignupState>(

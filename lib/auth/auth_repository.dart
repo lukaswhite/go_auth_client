@@ -9,20 +9,38 @@ import 'package:dartz/dartz.dart';
 import 'package:go_auth_client/http/responses/response.dart';
 import 'package:rxdart/rxdart.dart';
 
+enum AuthStatus { authenticated, anonymous }
+
+class AuthResult {
+
+  final AuthStatus status;
+  User? user;
+
+  AuthResult.authenticated(User this.user): status = AuthStatus.authenticated;
+  AuthResult.anonymous(): status = AuthStatus.anonymous;
+
+  bool get isAuthenticated {
+    return status == AuthStatus.authenticated;
+  }
+
+}
+
 class AuthRepository {
 
   final Client client;
   Token? token;
   User? user;
   final storage = const FlutterSecureStorage();
-  final BehaviorSubject<User> auth;
+  final BehaviorSubject<AuthResult> auth;
 
   static const _tokenKey = 'auth_token';
   static const _userKey = 'auth_user';
 
   AuthRepository({
     required this.client,
-  }): auth = BehaviorSubject<User>();
+  }): auth = BehaviorSubject<AuthResult>() {
+    auth.add(AuthResult.anonymous());
+  }
 
   Future<void> init() async {
     //await storage.deleteAll();
@@ -33,6 +51,9 @@ class AuthRepository {
     String? userStr = await storage.read(key: _userKey);
     if(userStr != null) {
       user = User.fromJson(json.decode(userStr));
+    }
+    if(token != null && user != null) {
+      auth.add(AuthResult.authenticated(user!));
     }
   }
 
@@ -80,14 +101,17 @@ class AuthRepository {
     await storage.delete(key: _tokenKey);
     await storage.delete(key: _userKey);
     token = null;
+    user = null;
     client.accessToken = null;
+    auth.add(AuthResult.anonymous());
   }
 
   Future<void> _authenticate({required Token token, required User user}) async {
     client.accessToken = token;
-    token = token;
+    this.token = token;
+    user = user;
     await _save(token: token, user: user);
-    auth.add(user);
+    auth.add(AuthResult.authenticated(user));
   }
 
   Future<void> _save({required Token token, required User user}) async {

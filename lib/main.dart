@@ -3,6 +3,8 @@ import 'app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/client.dart';
+import 'package:go_auth_client/auth/cubit/auth_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 void main() async {
 
@@ -16,7 +18,11 @@ void main() async {
   final Client client = Client(config: clientConfig);
   final AuthRepository authRepository = AuthRepository(client: client,);
   GetIt.I.registerSingleton(authRepository);
+  GetIt.I.registerSingleton(AuthCubit(repository: authRepository));
+
   await authRepository.init();
+
+  GoRouter.optionURLReflectsImperativeAPIs = true;
 
   runApp(const App());
 }

@@ -5,10 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:http_status_code/http_status_code.dart';
 
 class ClientConfig {
+
   final String hostname;
   final int port;
   final bool isHttps;
-
+  
   ClientConfig({
     required this.hostname,
     this.port = 443,
@@ -27,19 +28,21 @@ class ClientConfig {
 
 class Client {
 
-  Client({
-    required this.config,
-  });
-
+  final http.Client _client;
   final ClientConfig config;
   Token? accessToken;
 
+  Client({
+    http.Client? client,
+    required this.config,
+  }): _client = client ?? http.Client();
+  
   bool get hasAccessToken {
     return accessToken != null;
   }
 
   Future<Response> post(String path, Map<String, String> payload) async {
-    var response = await http.post(
+    var response = await _client.post(
       url(path), 
       headers: _headers(),
       body: jsonEncode(payload),

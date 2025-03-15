@@ -15,6 +15,7 @@ import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:animated_visibility/animated_visibility.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -36,8 +37,8 @@ class LoginForm extends StatelessWidget {
               type: QuickAlertType.success,
               text: 'You have logged in successfully',
               onConfirmBtnTap: () {
-                print('OK');
                 Navigator.of(context).pop();
+                GoRouter.of(context).replace('/');
               }
             );
           }

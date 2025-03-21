@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_auth_client/auth/cubit/auth_widget_cubit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:get_it/get_it.dart';
@@ -24,6 +25,18 @@ final router = GoRouter(
       path: AuthScreen.route,
       builder: (context, state) => const AuthScreen(),
       redirect: (BuildContext context, GoRouterState state) => _anonymous(context, state),
+      routes: [
+        GoRoute(
+          path: AuthWidgetView.login.name,
+          builder: (context, state) => const AuthScreen(initalView: AuthWidgetView.login,),
+          redirect: (BuildContext context, GoRouterState state) => _anonymous(context, state),
+        ),
+        GoRoute(
+          path: AuthWidgetView.signup.name,
+          builder: (context, state) => const AuthScreen(initalView: AuthWidgetView.signup,),
+          redirect: (BuildContext context, GoRouterState state) => _anonymous(context, state),
+        ),
+      ]
     ),
     GoRoute(
       path: AccountScreen.route,

@@ -10,23 +10,51 @@ import 'package:go_auth_client/forms/view/form_error.dart';
 import 'package:go_auth_client/forms/view/form_validation_errors.dart';
 import 'package:pretty_animated_buttons/pretty_animated_buttons.dart';
 import 'package:get_it/get_it.dart';
-import 'package:quickalert/quickalert.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animated_visibility/animated_visibility.dart';
 import 'package:go_auth_client/screens/welcome_screen.dart';
 import 'package:password_strength_checker/password_strength_checker.dart';
 import 'package:go_auth_client/ui/view/loading_overlay.dart';
+import 'package:password_complexity/password_complexity.dart';
+import 'package:flutter_translate/flutter_translate.dart';
+
+class ReactiveFormsPasswordComplexityValidator extends Validator<dynamic> {
+  
+  final PasswordComplexityConfig config;
+  final PasswordComplexityValidator _validator;
+
+  ReactiveFormsPasswordComplexityValidator({
+    required this.config,
+  }): _validator = PasswordComplexityValidator(config: config), super();
+
+  @override
+  Map<String, dynamic>? validate(AbstractControl<dynamic> control) {
+    return control.isNotNull &&
+      _validator.check(control.value).isValid
+    ? null
+    : {'passwordComplexity': true};
+  }
+}
 
 class SignupForm extends StatelessWidget {
   SignupForm({super.key});
 
   FormGroup get form => fb.group(<String, Object>{
-    'username': ['', Validators.required, Validators.minLength(6)],
+    'username': ['', Validators.required, Validators.minLength(3)],
     'name': ['', Validators.required],
-    'password': ['', Validators.required],
+    'password': ['', ReactiveFormsPasswordComplexityValidator(config: passwordComplexityConfig,)],
   });
 
   final passNotifier = ValueNotifier<PasswordStrength?>(null);
+  final passwordValue = ValueNotifier<String?>(null);
+
+  final passwordComplexityConfig = PasswordComplexityConfig(
+    minLength: 8,
+    minDigits: 1,
+    minLowercase: 1,
+    minUppercase: 1,
+    minSymbols: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +63,17 @@ class SignupForm extends StatelessWidget {
       child: BlocListener<SignupBloc, SignupState>(
         listener: (context, state) {
           if(state is SignupComplete) {
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.success,
-              text: 'You have signed up successfully',
-              onConfirmBtnTap: () {
-                Navigator.of(context).pop();
-                GoRouter.of(context).replace(WelcomeScreen.route);
-              }
-            );
+            GoRouter.of(context).replace(WelcomeScreen.route);
+          } else if (state is SignupError && state.response is ValidationFailedResponse) {
+            var c = form.control('name');
+              c.setErrors({'required' : true});
+              c.markAsTouched();
+            for(var entry in (state.response as ValidationFailedResponse).errors.entries) {
+              var c = form.control(entry.key);
+              c.setErrors({entry.value.first.error : true});
+              c.markAsTouched();
+            }
+            c.markAllAsTouched();
           }
         },
         child: BlocBuilder<SignupBloc, SignupState>(
@@ -54,20 +84,30 @@ class SignupForm extends StatelessWidget {
             builder: (context, form, child) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+                children: [                  
                   AnimatedVisibility(
                     visible: (state is SignupError && state.response is DuplicateEntityResponse && (state.response as DuplicateEntityResponse).field == 'username'),
-                    child: const FormError(message: 'That username is taken'),           
+                    child: FormError(
+                      message: translate('auth.signup.errors.username_taken.message'),
+                      footerBuilder: () => TextButton(
+                        onPressed: () => context.push('/auth/login'), 
+                        child: Text(
+                          translate('auth.signup.errors.username_taken.footer.action'), 
+                          style: TextStyle(color: Theme.of(context).colorScheme.onError,),
+                        ),
+                      ),
+                    ),      
                   ),
                   FormElementWrapper(
                     child: ReactiveTextField<String>(
                       formControlName: 'username',
-                      decoration: const InputDecoration(
-                        labelText: 'Username',
+                      decoration: InputDecoration(
+                        labelText: translate('auth.signup.form.fields.username.label'),
                       ),
                       validationMessages: {
-                        ValidationMessage.required: (_) => 'Username must not be empty',
-                        ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
+                        ValidationMessage.required: (_) => translate('auth.signup.form.fields.username.errors.required'),
+                        //ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
+                        ValidationMessage.minLength: (error) => translatePlural('auth.signup.form.fields.username.errors.min_length.plural', (error as Map)['requiredLength'])
                       },
                       readOnly: (state is SignupSubmitting),
                     ),
@@ -77,11 +117,11 @@ class SignupForm extends StatelessWidget {
                   FormElementWrapper(
                     child: ReactiveTextField<String>(
                       formControlName: 'name',
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
+                      decoration: InputDecoration(
+                        labelText: translate('auth.signup.form.fields.name.label'),
                       ),
                       validationMessages: {
-                        ValidationMessage.required: (_) => 'Name must not be empty',
+                        ValidationMessage.required: (_) => translate('auth.signup.form.fields.name.errors.required'),
                       },
                       readOnly: (state is SignupSubmitting),
                     ),
@@ -92,15 +132,31 @@ class SignupForm extends StatelessWidget {
                     child: ReactiveTextField<String>(
                       formControlName: 'password',
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
+                      decoration: InputDecoration(
+                        labelText: translate('auth.signup.form.fields.password.label'),
                       ),
                       validationMessages: {
-                        ValidationMessage.required: (_) => 'Password must not be empty',
+                        ValidationMessage.required: (_) => translate('auth.signup.form.fields.password.errors.required'),
+                        'passwordComplexity': (_) => translate('auth.signup.form.fields.password.errors.complexity'),
                       },
                       readOnly: (state is SignupSubmitting),
-                      onChanged: (control) => passNotifier.value = PasswordStrength.calculate(text: control.value!),
+                      onChanged: (control) => passwordValue.value = control.value!,
                     ),
+                  ),
+                  ReactiveFormConsumer(
+                    builder: (context, form, child) {
+                      //if(!form.control('password').hasErrors || !form.control('password').touched) return const SizedBox();
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 12.0,),
+                        child: PasswordComplexityWidget(
+                          config: passwordComplexityConfig, 
+                          value: passwordValue,
+                          theme: PasswordComplexityTheme(
+                            invalidColor: Theme.of(context).textTheme.bodyMedium!.color!,
+                            textStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium!.color)),
+                        ),
+                      );
+                    }
                   ),
                   /** 
                   PasswordStrengthChecker(
@@ -122,7 +178,12 @@ class SignupForm extends StatelessWidget {
                             SignupRequest request = SignupRequest.fromMap(form.value);
                             context.read<SignupBloc>().add(SignupSubmit(request: request));
                           },
-                          child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
+                          child: Text(
+                            translate('auth.signup.form.submit.label'), 
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       );
                     },

@@ -13,6 +13,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:animated_visibility/animated_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_auth_client/ui/view/loading_overlay.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -50,17 +51,16 @@ class LoginForm extends StatelessWidget {
                   children: [
                     AnimatedVisibility(
                       visible: (state is LoginError && state.response is UnauthorizedResponse) ,
-                      child: const FormError(message: 'Username or password is incorrect'),           
+                      child: FormError(message: translate('auth.login.errors.credentials.message')),           
                     ),
                     FormElementWrapper(
                       child: ReactiveTextField<String>(
                         formControlName: 'username',
-                        decoration: const InputDecoration(
-                          labelText: 'Username',
+                        decoration: InputDecoration(
+                          labelText: translate('auth.login.form.fields.username.label'),
                         ),
                         validationMessages: {
-                          ValidationMessage.required: (_) => 'Username must not be empty',
-                          ValidationMessage.minLength: (error) => 'The username must be at least ${(error as Map)['requiredLength']} characters long'
+                          ValidationMessage.required: (_) => translate('auth.login.form.fields.username.errors.required'),
                         },
                         readOnly: (state is LoginSubmitting),
                       ),
@@ -69,11 +69,11 @@ class LoginForm extends StatelessWidget {
                       child: ReactiveTextField<String>(
                         formControlName: 'password',
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
+                        decoration: InputDecoration(
+                          labelText: translate('auth.login.form.fields.password.label'),
                         ),
                         validationMessages: {
-                          ValidationMessage.required: (_) => 'Password must not be empty',
+                          ValidationMessage.required: (_) => translate('auth.login.form.fields.password.errors.required'),
                         },
                         readOnly: (state is LoginSubmitting),
                       ),
@@ -91,7 +91,12 @@ class LoginForm extends StatelessWidget {
                               LoginRequest request = LoginRequest.fromMap(form.value);
                               context.read<LoginBloc>().add(LoginSubmit(request: request));
                             },
-                            child: const Text('Log in', style: TextStyle(color: Colors.white),),
+                            child: Text(
+                              translate('auth.login.form.submit.label'), 
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         );
                       },

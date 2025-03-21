@@ -4,28 +4,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_auth_client/auth/cubit/auth_widget_cubit.dart';
 import 'login_form.dart';
 import 'signup_form.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 
 class AuthWidget extends StatelessWidget {
-  const AuthWidget({super.key});
+
+  final AuthWidgetView? initialView;
+
+  const AuthWidget({super.key, this.initialView,});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AuthWidgetCubit>(
-      create: (_) => AuthWidgetCubit(),
+      create: (_) => AuthWidgetCubit(view: initialView),
       child: BlocBuilder<AuthWidgetCubit, AuthWidgetState>(
         builder: (context, state) => Column(
           children: [
-            //Text(context.read<AuthWidgetCubit>().state.toString()),
             CustomSlidingSegmentedControl<AuthWidgetView>(
-              initialValue: AuthWidgetView.login,
+              initialValue: initialView ?? AuthWidgetView.login,
               isStretch: true,
-              children: const {
+              children: {
                 AuthWidgetView.login: Text(
-                  'Log In',
+                  translate('auth.tabs.login.label'),
                   textAlign: TextAlign.center,
                 ),
                 AuthWidgetView.signup: Text(
-                  'Sign Up',
+                  translate('auth.tabs.signup.label'),
                   textAlign: TextAlign.center,
                 ),
               },

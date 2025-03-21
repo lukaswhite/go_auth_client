@@ -6,7 +6,9 @@ part 'auth_widget_state.dart';
 enum AuthWidgetView { login, signup }
 
 class AuthWidgetCubit extends Cubit<AuthWidgetState> {
-  AuthWidgetCubit() : super(const AuthWidgeDisplay.login());
+  AuthWidgetCubit({
+    AuthWidgetView? view,
+  }) : super(AuthWidgeDisplay(view: view ?? AuthWidgetView.login));
 
   void select(AuthWidgetView view) {
     emit(AuthWidgeDisplay(view: view));

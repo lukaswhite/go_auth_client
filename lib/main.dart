@@ -5,6 +5,7 @@ import 'package:go_auth_client/auth/auth_repository.dart';
 import 'package:go_auth_client/http/client.dart';
 import 'package:go_auth_client/auth/cubit/auth_cubit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 
 void main() async {
 
@@ -12,7 +13,7 @@ void main() async {
 
   final ClientConfig clientConfig = ClientConfig(
     hostname: 'localhost',
-    port: 3001,
+    port: 3000,
     isHttps: false,
   );
   final Client client = Client(config: clientConfig);
@@ -24,5 +25,9 @@ void main() async {
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  runApp(const App());
+  var delegate = await LocalizationDelegate.create(
+    fallbackLocale: 'en_US',
+    supportedLocales: ['en_US', 'en',]);
+
+  runApp(LocalizedApp(delegate, const App()));
 }

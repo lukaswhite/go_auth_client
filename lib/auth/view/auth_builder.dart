@@ -5,12 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 typedef AuthBuilderBuildFunc = Widget Function(BuildContext context, User user);
 
+// ignore: must_be_immutable
 class AuthBuilder extends StatelessWidget {
 
   final AuthBuilderBuildFunc builder;
-  Widget? child;
+  Widget? anonymous;
 
-  AuthBuilder({super.key, required this.builder, this.child,});
+  AuthBuilder({super.key, required this.builder, this.anonymous,});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class AuthBuilder extends StatelessWidget {
         if (state is AuthAuthenticated) {
           return builder(context, state.user);
         }
-        return child ?? const SizedBox();
+        return anonymous ?? const SizedBox();
       }
     );
   }

@@ -4,6 +4,8 @@ import 'responses/responses.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_status_code/http_status_code.dart';
 
+typedef ResponseBuilder = Response Function(http.Response);
+
 class ClientConfig {
 
   final String hostname;
@@ -41,18 +43,26 @@ class Client {
     return accessToken != null;
   }
 
-  Future<Response> post(String path, Map<String, String> payload) async {
-    var response = await _client.post(
-      url(path), 
-      headers: _headers(),
-      body: jsonEncode(payload),
-    );
-    return _convertResponse(response);
+  Future<Response?> post(String path, Map<String, String> payload, {ResponseBuilder? responseBuilder,}) async {
+    try {
+      var response = await _client.post(
+        url(path), 
+        headers: _headers(),
+        body: jsonEncode(payload),
+      );
+      return _convertResponse(response, responseBuilder: responseBuilder,);
+    } catch (e) {
+      // debugPrint(e.toString());
+    }
+    
   }
 
-  Response _convertResponse(http.Response response) {
+  Response _convertResponse(http.Response response, {ResponseBuilder? responseBuilder,}) {
     if(response.statusCode == StatusCode.UNAUTHORIZED) {
       return UnauthorizedResponse();
+    }
+    if(response.statusCode == StatusCode.FORBIDDEN) {
+      return AccessDeniedResponse();
     }
     if(response.statusCode == StatusCode.NOT_FOUND) {
       return NotFoundResponse();
@@ -61,10 +71,14 @@ class Client {
       return ValidationFailedResponse.fromResponse(response);
     }
     if(response.statusCode == StatusCode.CONFLICT) {
-      return DuplicateEntityResponse(statusCode: response.statusCode, field: jsonDecode(response.body)['body']['field']);
+      return DuplicateEntityResponse.fromResponse(response);
+      //return DuplicateEntityResponse(statusCode: response.statusCode, field: jsonDecode(response.body)['body']['field']);
     }
     if(response.statusCode == StatusCode.INTERNAL_SERVER_ERROR) {
       return ServerErrorResponse();
+    }
+    if(responseBuilder != null) {
+      return responseBuilder(response);
     }
     return Response.fromResponse(response);
   }

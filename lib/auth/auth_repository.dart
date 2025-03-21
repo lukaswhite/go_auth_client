@@ -8,20 +8,34 @@ import 'package:go_auth_client/http/client.dart';
 import 'package:dartz/dartz.dart';
 import 'package:go_auth_client/http/responses/response.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:go_auth_client/auth/http/responses/token_response.dart';
 
-enum AuthStatus { authenticated, anonymous }
+//enum AuthStatus { authenticated, anonymous }
 
 class AuthResult {
 
-  final AuthStatus status;
+  //final AuthStatus status;
   User? user;
 
+  AuthResult.authenticated(User this.user);
+  AuthResult.anonymous();
+
+  bool get isAuthenticated {
+    return user != null;
+  }
+
+  bool get isAnonymous {
+    return user == null;
+  }
+
+  /** 
   AuthResult.authenticated(User this.user): status = AuthStatus.authenticated;
   AuthResult.anonymous(): status = AuthStatus.anonymous;
 
   bool get isAuthenticated {
     return status == AuthStatus.authenticated;
   }
+  **/
 
 }
 
@@ -43,7 +57,6 @@ class AuthRepository {
   }
 
   Future<void> init() async {
-    //await storage.deleteAll();
     String? tokenStr = await storage.read(key: _tokenKey);
     if(tokenStr != null) {
       token = Token.fromJson(json.decode(tokenStr));
@@ -62,21 +75,19 @@ class AuthRepository {
   }
 
   Future<Either<User, Response>> signup(SignupRequest request) async {
-    final response = await client.post('signup', request.toJson());
-    if(response.isError) {
+    final response = await client.post(
+      'signup', 
+      request.toJson(),
+      responseBuilder: (response) => TokenResponse.fromResponse(response),
+    );
+    if(response!.isError) {
       return Right(response);
     }
-    //(Token token, User user) = 
-    final Token token = Token.fromJson(response.body['token']);
-    final User user = User.fromJson(response.body['user']);
-    //var record = parseResponse(response);
-    await _authenticate(token: token, user: user,);
-    return Left(user);
-    /**
-    var record = parseResponse(response);
-    await _authenticate(token: record.$1, user: record.$2,);
-    return Left(record.$2);
-     */
+    await _authenticate(
+      token: (response as TokenResponse).token, 
+      user: response.user!, 
+    );
+    return Left(response.user!);
   }
 
   (Token, User) parseResponse(Response response) {
@@ -87,14 +98,19 @@ class AuthRepository {
   }
 
   Future<Either<User, Response>> login(LoginRequest request) async {
-    final response = await client.post('login', request.toJson());
-    if(response.isError) {
+    final response = await client.post(
+      'login', 
+      request.toJson(),
+      responseBuilder: (response) => TokenResponse.fromResponse(response),
+    );
+    if(response!.isError) {
       return Right(response);
     }
-    final Token token = Token.fromJson(response.body['token']);
-    final User user = User.fromJson(response.body['user']);
-    await _authenticate(token: token, user: user,);
-    return Left(user);
+    await _authenticate(
+      token: (response as TokenResponse).token, 
+      user: response.user!, 
+    );
+    return Left(response.user!);
   }
 
   Future<void> logout() async {

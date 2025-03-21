@@ -15,6 +15,6 @@ class FormValidationError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(error.field.capitalize() + ' ' + error.errorDescription);
+    return Text(error.errorDescription, style: TextStyle(color: Theme.of(context).colorScheme.error,));
   }
 }
